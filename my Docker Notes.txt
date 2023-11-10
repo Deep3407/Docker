@@ -1,0 +1,461 @@
+Day1 Topics
+
+Introduction of Docker --
+Docker Images ----------- To Run Or create a container we Need docker image
+Docker Containers-------- It is a isolated part of machine .
+Docker Hub -------------- it is a online repos of docker images 
+Docker File ------------- it is instruction to writen a our own docker immages 
+
+STEPS TO INSTALL DOCKER IN OUR EC2 MACHINE
+
+STEP 1 - CREATE AN UBUNTU MACHINE AND INSTALL DOCKER 
+COMMAND -- apt install docker.io
+
+Note -- To view Docker Images in your machine  
+command -- docker images 
+
+STEP 2 - download docker images from docker hub to our machine 
+example -- docker pull <image name>
+
+So, Now we downloaded some images to our local machine to Run as a Container
+
+STEP 3 - To Create a Container 
+COMMAND - docker run -itd -p "8080:80" httpd
+
+explain about that -p -- it is a port forwarding 
+                   -i -- input/intractive 
+                    t  --   terminal 
+                    d   --     detach
+
+yen nammma intha port forwording pandrom because , we downloaded that apache image and run as container ,
+we are not install apache in our own ubntu machine , athanala ena agum na nama ip address eduthu hit panumpothu 
+namaluku webpage katathu , athnala than intha port forwording pandrom to redirect the request to the container .
+
+Note - now hit the <pub ip>:8080 it redirect to the apache container 
+
+so that we can set multiple containers in a single host .
+
+Note - To view how many container we have 
+
+COMMAND - docker ps 
+
+STEP 4 - To Go inside in a particular container . for example (apache)
+
+COMMAND - docker exec -it <container id> /bin/bash
+
+Now its shows like this -- root@28d2a5dd218f:/usr/local/apache2#
+
+Note - for Linux machine web server deployment path is -- /var/www/html
+       for Ubuntu machine web server deployment path is -- htdocs
+
+STEP 5 - Now go the deployment path for ubuntu machine 
+
+command - cd htdocs
+
+then you will see the index.html file in it . to change the content in the index file use vi index.html
+
+but it will show some error because you dont have vim editor in your apache container . we need to install vim editor to the apache container
+that were we called as dependencies packages .
+
+(apt-get update
+apt-get install vim
+sudo service docker start) dont consider this
+
+ **** create  some more container  and explain about it ***
+
+STEP 6 - TO find the status of all container .
+
+command -  docker stats
+
+command -- docker top ( cont id ) to see specific status of container
+
+*** it shows the runing status of our container cpu , memory ,pid etc ***
+
+STEP 7 - To show the Entier details of our docker container 
+
+command -- docker inspect <cont id>
+
+*** it will show the entier details of container ***
+
+STEP 8 - To view the log files about the container 
+
+COMMAND -- docker logs <cont id>
+
+NOTE -- intha command porathuku munnadi students ku oru coantainer ip adddresa share panu 
+
+** yarallem intha container ip hit panna list ungaluku varum **
+
+STEP 9 - To stop a Runing container 
+
+command -- docker stop <cont id>
+
+then give docker ps it will show only running docker conntainer , to view all the stoped and running container 
+
+command -- docker ps -a 
+
+STEP 10 - To remove a stoped container 
+
+Command - docker rm <cont Id>
+
+TASK -- Remove a runing container in docker 
+
+STEP 11 - To remove docker images
+
+Command - docker rmi <image id>
+
+Now, delete all the container and delete the image id from docker .
+
+STEP 12 - create a container without images is it possible ,yep 
+
+command - docker run -itd -p "8080:80" --name "any name"  httpd 
+
+its will automatically download the image from the docker hub and create a container .
+
+ sudo service docker start - to start a docker 
+
+---------------------------------------------------------------------------------------------------------------------------
+SECOND DAY ACTIVITIES 
+
+TOPICs 
+1 Explaination About Docker files
+2 explain about itd and /bin/bash
+
+docker container port number a change pana mudiuma once create ana container ku 
+Answer - NO 
+
+but , nama antha container again image a mathipanalam .
+
+so today we are going to see how to take a container backup and convert into a image .
+
+
+docker run -itd -p "8080:80" --name "any name"  httpd
+docker exec -it <container name> /bin/bash
+
+
+STEP 1 - To create a backup container as a image 
+command -- docker commit <cont id> <your image name>
+
+so that ithu valiya nama already image eduthu oru conatainer create pani athula some applictionlam add pana containera
+nama image a mathi atha vachu nama neraya containersa launch panikalam .
+
+note --  we can take backup images in two ways
+         1 online method
+	   2 offline method
+
+STEP 2 - TO create a backup image through offline
+Command -- docker save -o /root/<some name .tar> <your image name>
+
+note **
+    -o = output
+    .tar == must to put .tar extension 
+
+*** Now delete your own created image using -- docker rmi <image id>
+
+Due our backup our image is stored in our root path in tar format, now again make the (.tar) image into docker image
+
+command -- docker load -i <your.tar Image name> 
+
+STEP 3 - To create a backup images through online 
+
+first create a docker account in docker hub,then 
+
+STEP 4 - login docker hub acc into your linux server 
+
+command - docker login
+
+give ur user name and password .then tag your image with docker hub name 
+
+command -- docker tag mynewimg <docker hub name>/<whatever name>
+
+STEP  - To push the docker Image to the docker hub 
+commad -- docker push <your docker hub image name>
+
+------------------------------------------------
+DOCKER FILE 
+
+instruction to create our own customised docker images
+
+FROM
+RUN
+MAINTAINER
+LABLE
+EXPOSE
+ARG
+ENV
+ENTRYPOINT
+CMD
+ADD
+COPY
+
+STEP 1 - First to creat a docker file set 
+
+Dockerfile 
+
+FROM ubuntu:22.04
+LABEL Name="Dinesh"
+RUN apt-get update
+RUN apt install apache2 -y 
+
+it is like a user data 
+
+STEP 2 - Then to creat image from docker file 
+command - docker build -t mynewimg:v1 /root 
+
+now it will created a image from docker file 
+
+** ipa ena panaporom na docker file eluthirikinga atha update pana solranga some packageslam install set pana solranga
+so namma ena panaporom na docker file a edit pana porom 
+==========================================================
+STEP 3 - Docker file edit pandrom
+
+FROM mynewimg:v1
+LABEL Name="Dinesh"
+RUN apt install vim -y
+RUN apt install git -y
+
+then again creat a image by this edited -----
+
+ vi Dockerfile 
+
+command - docker build -t mynewimg:v2 /root
+
+now it will created a image from docker file
+==========================================================
+NOW EXPLAIN ABOUT itd 
+
+Athuku munnadi give ur ip address to them and then from the docker image run a container 
+
+command - docker run -p "80:80" httpd 
+
+from like this if we are giving without ( -itd ) , if we hit the ip it will show the log of the server. 
+that (-d) will stores the log in  background .  
+  
+-i - Input/interactive
+-t - Terminal
+-d - Detached 
+
+another example 
+
+FROM python:3
+WORKDIR /usr/src/app
+COPY test.py /usr/src/app
+ENTRYPOINT python3 test.py
+
+****before going to execute this comand  we need add test.py in our file path***
+ 
+vi test.py file 
+
+print("enter a name")
+name = input()
+print("hello",name) 
+
+NOte -- WORKDIR /usr/src/app ( when we enter docker exec -it <cont id> /bin/bash  for this container 
+					for example antha httpd container ku file path (usr/local/apache2) set panirukanga 
+					antha mari intha WORKDIR nama create pana imagesku  file path represent panum )
+====================================================
+STEP 4 - Now change the directory 
+	comand- cd opt/
+	in that dir -- vi dockerfile 
+
+FROM python:3
+WORKDIR /usr/src/app
+COPY test.py /usr/src/app
+ENTRYPOINT python3 test.py
+
+
+And from save it , from out you dont have a test.py file over so that create that test.py file and save it.
+
+STEP 5 - now again create an image 
+
+command - docker build -t pythonimg:v1 .
+
+then it will creat a image we can see that 
+
+STEP 6 - create a container without giving (-itd)
+commad - docker run pythonimg:v1 
+
+it will ask the input option over there with error (beacuse we didnt mention (-i) over there )
+
+then give once again that command using  (docker run -i pythonimg:v1)
+
+** After that again creat a docker container with (-itd) now it will create a container.
+
+command - docker run -itd pythonimg:v1
+
+STEP 7 - To view inside inthe container
+command - docker exec -it <cont id> /bin/bash
+
+so again explain about that  -itd 
+
+=========================================================================================
+DOCKER DAY 3
+
+TOPIC 
+docker volume 
+docker volume backup
+container access
+connectivity (container to conatiner acces)
+	link
+	dockercompose
+	docker network
+overview about k8 and dockerswarm
+
+STEP 1 - if you delete all stoped container and images at one single shot 
+command - docker system prune -a
+
+if you want to synchronise the docker volume from container to your linux machine , first we need create a directory in our local machine in file path (#opt) and **go to that file path /opt/demo**
+and then apply
+command -- docker run -itd -p "8080:80" --name "web1" -v "/opt/demo:/usr/local/apache2/htdocs" httpd
+
+And then we get the output if we hit the ip address to the browser .
+
+To chang the index.html in container go to the conatiner 
+
+command - docker exec -it <cont id> /bin/bash 
+
+from the container path /usr/local/apache2/htdocs 
+
+change the index.html file but we dont have (Vim editor) in that container instead of (vim editor) we use the echo comand over there to print whatever we want 
+
+from the file path /usr/local/apache2/htdocs# echo "hi every one " > index.html  
+
+---------------------------------------------------------------------------------------------------------------
+Container Access
+
+simple concept -- ec2 kulla enter agamale nama velila erunthu nama container access panalam.
+
+STEP1 -  create a dockerfile in /opt/demo
+
+FROM ubuntu:16.04
+MAINTAINER deepak
+RUN apt-get update
+RUN apt-get install openssh-server -y
+RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN echo 'root:root123' | chpasswd
+RUN mkdir /var/run/sshd
+CMD ["/usr/sbin/sshd", "-D"] 
+
+explanation about - open ssh it is our ssh port to connect our linux machine
+
+Sed - it is used for change a specfic word in a file path 
+
+STEP2 - Run this file create a docker image named as containeraccess 
+
+command -- docker build -t containeraccess .
+
+STEP3 - then create the container using that image
+
+command -- docker run -itd -p "2222:22" containeraccess
+
+STEP4 - go to that container 
+
+command - docker exec -it <con> /bin/bash
+
+**NOTE  then go to that console copy the ip and login with putty with the port number of 2222 . dont give any key pair just give open **
+
+STEP5 - give name root and password root123
+
+then it connect automatically to our container.
+
+-----------------------------------------------------------------------------------------------------------
+Scenario - ipa ena panaporam na ec2 kulla container to container permmision kudthu acces pana porom .
+		   directa oru third party user container acces pana vida avara vera oru container access proviide 
+           antha conatainer volume current container volume a merge panuvom and only read permisson than 
+           provide panrathunala avarala only read pana matum than panamudim veraa ethum panamudiyathu.
+
+Docker command to Give Read only Access to a containers
+
+STEP 1 - again creat one container with name of webserver
+
+command - docker run -itd -p "8084:80" -v "/usr/local/apache2/logs" --name "webserver" httpd
+
+STEP 2 - to create a another container with port number 2222 again 
+
+command -- docker run -itd -p "2223:22" --volumes-from webserver:ro container
+
+** ro - read only access **
+
+STEP 3 - then open new machine with 2222 port number and open it up
+
+
+STEP 4 - go to the webserver conatiainer 
+
+command - docker exec -it <con> /bin/bash
+
+then go to the file path /usr/local/apache2/logs and create one file using **touch command**
+
+go to that new machine you will see the new file over but you cant delete that .
+
+-------------------------------------------------------------------------------------------------------------------
+** Container to Container Connectivity **
+
+for container to container connectivity we always use ** link ** flag for this operation 
+but we now changed because docker  replace that link flag . 
+
+create an example wordpress application it will need database mandatory . 
+first we creating database container first and then after we the wordpres container .
+
+STEP 1 - docker run -itd mysql:5.5
+
+** it will create an image but if you see the docker container it has been failed ..** how will you check that ?
+
+command - docker logs <cont id >
+
+it will shows the error what we have done 
+
+STEP 2 - So here we going to specify that environment variable to assign ..
+
+command - docker run -itd --name db -e MYSQL_ROOT_PASSWORD=123 mysql:5.5 
+
+STEP 3 - Now we are going to create wordpress container ..
+
+command - docker run -itd --name webserver2 --link db:mysql -p "8085:80" wordpress
+
+now hit the ip address we connect with our wordpress app.
+
+-----------------------------------------------------------------------------------
+Docker Compose 
+ 
+docker compose it same like a docker file , but in docker compose we write yaml file to create multiple containers in same network .
+
+STEP 1 - so to fine docker networks 
+ 
+command - docker network and after docker network ls
+
+STEP 2 - So now we creating docker Compose file .
+
+format should be in ** docker-compose.yml **
+
+STEP 3 - add the compose file in that particular docker compose file ..
+
+first of all docker compose is not a feature of docker . it is add on services of docker .
+so we need to install docker compose application to our docker machine .
+
+link - https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-22-04
+
+use this link to install docker compose app to our ubuntu server ..
+
+STEP 4 - then, to run docker compose file using comand
+
+before that run this command - ** apt install docker-compose ** 
+
+command - docker-compose up -d 
+
+then it will create image and containers, now again see that network using docker network ls 
+it will show the network status .
+
+use comand -- docker network inspect
+
+it will show network ip address were our are been created ....
+
+--------------------------------------------------
+BY basic we have 4 types of network 
+none network 
+bridge network
+host network
+overrelay network
+macvilan network
+
+explain about some types
+----------------------------------------------------------------
+

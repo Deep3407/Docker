@@ -1,0 +1,48 @@
+1. How to start Jenkins on Docker Container
+2. Start and Stop Jenkins Container
+3. How to set Jenkins home on Docker Volume and Host Machine
+
+
+: docker pull jenkins
+: docker run -p 8080:8080 -p 50000:50000 jenkins
+(https://github.com/jenkinsci/docker/blob/master/README.md)
+
+8080 : docker server
+50000 : jenkins api
+
+
+To create persistent storage
+
+: 
+
+docker run --name MyJenkins2222 -p 8081:8080 -p 50001:50000 -v test:/var/jenkins_home jenkins
+
+
+Create a job and check the details in jenkins
+
+: docker volume create myjenkins
+: docker volume ls
+: docker volume inspect myjenkins
+: docker run --name MyJenkins3 -p 9090:8080 -p 50000:50000 -v myjenkins:/var/jenkins_home jenkins
+: docker inspect MyJenkins3
+
+check volumes are shared
+localhost:8080
+localhost : 9090 ;ogin with 8080 username and password in jenkins
+
+when removed all data in containers are not available so we need persistent data for storage
+https://docs.docker.com/storage/
+
+
+
+data between container -- volume
+data between host and container - bind
+
+
+
+docker run -it -v /opt/mani:/bind alpine /bin/sh
+
+docker run -it --mount type=bind,source=/opt/mani,target=/bind alpine /bin/sh
+
+Volume and bind mount operations are taken care by storage driver ( maintaing layered architecture --- AUFS, overlay, overlay2.....)
+Storage driver is based on underlying OS
